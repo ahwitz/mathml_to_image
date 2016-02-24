@@ -24,8 +24,17 @@ TEMPFILE_PDF_LOCATION = TEMPFILE_ROOT + ".pdf"
 TEMPFILE_JPG_LOCATION = TEMPFILE_ROOT + ".jpg"
 
 """
-mathml_to_jpg: converts .mml at source_location
- returns string error message if error, 0 if everything worked
+mathml_to_jpg: converts .mml at source_location to ImageMagick's interpretation of output_location's extension
+
+Parameters:
+	source_location: location of source .mml file
+	output_location: location of output image file
+	verbose=False (optional): print debug/progress statements
+	overwrite=False (optional): overwrite output_location if it exists already
+	newHeight=0 (optional): rescales output to newHeight if newHeight < height
+	newWidth=0 (optional): rescales output to newWidth if newWidth < width
+
+Returns: string error message if error, 0 if everything worked
 
 """
 def mathml_to_jpg(source_location, output_location, verbose=False, overwrite=False, newHeight=0, newWidth=0):
