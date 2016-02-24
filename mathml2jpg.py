@@ -2,11 +2,14 @@
 # Requires: conTeXt (http://wiki.contextgarden.net/ConTeXt_Standalone)
 # Requires: ImageMagick
 # ----Requires: GhostScript for PDF conversion in ImageMagick
+# Requires: Pillow/PIL
 
 import subprocess
 import sys
 import os
 import os.path
+
+from PIL import Image
 
 # change the bash environment so context can be accessed
 SETUPTEX_LOCATION = "/Applications/context/tex/setuptex" # recommended Mac install location
@@ -18,13 +21,14 @@ if not os.path.isfile(SETUPTEX_LOCATION):
 TEMPFILE_ROOT = "tmp/tempfile"
 TEMPFILE_LOCATION = TEMPFILE_ROOT + ".tmp" 
 TEMPFILE_PDF_LOCATION = TEMPFILE_ROOT + ".pdf"
+TEMPFILE_JPG_LOCATION = TEMPFILE_ROOT + ".jpg"
 
 """
 mathml_to_jpg: converts .mml at source_location
  returns string error message if error, 0 if everything worked
 
 """
-def mathml_to_jpg(source_location, output_location, verbose=False, overwrite=False, newSize=""):
+def mathml_to_jpg(source_location, output_location, verbose=False, overwrite=False, newHeight=0, newWidth=0):
 	# check validity of source/output location
 	if not os.path.isfile(source_location):
 		return "Source location is not a file."
@@ -59,8 +63,86 @@ def mathml_to_jpg(source_location, output_location, verbose=False, overwrite=Fal
 	if (verbose):
 		print("Converting", source_location, "to jpg...")
 	# convert to jpg, density 400 is to make it look slightly purdier
-	convert_status = subprocess.check_call(["convert", "-density", "400", TEMPFILE_PDF_LOCATION, output_location]) # TODO: add resize to newSize
+	convert_status = subprocess.check_call(["convert", "-density", "400", TEMPFILE_PDF_LOCATION, TEMPFILE_JPG_LOCATION])
 
-	#TODO: PIL
+	if (verbose):
+		print("Resizing", source_location)
+	tmp_img = Image.open(TEMPFILE_JPG_LOCATION)
+
+	def check_pixel(curX, curY):
+		pixValue = tmp_img.getpixel((curX, curY))
+		if pixValue < 10: # if it's black
+			return True
+		return False
+
+	height = tmp_img.height
+	width = tmp_img.width
+	
+	left = 0
+	right = width
+	upper = 0
+	lower = height
+
+	# TODO: optimize
+
+	# check left
+	if (verbose):
+		print("Left...")
+	check = False
+	for left in range(0, width):
+		for curY in range(0, height, 2):
+			if check_pixel(left, curY):
+				check = True
+				break
+		if check:
+			break
+
+	# check right
+	if (verbose):
+		print("...is", str(left), "and right...")
+	check = False
+	for curX in range(0, width):
+		right = width - curX - 1
+		for curY in range(0, height, 2):
+			if check_pixel(right, curY):
+				check = True
+				break
+		if check:
+			break
+
+	# check upper
+	if (verbose):
+		print("...is", str(right), "Upper...")
+	check = False
+	for upper in range(0, height):
+		for curX in range(0, width, 2):
+			if check_pixel(curX, upper):
+				check = True
+				break
+		if check:
+			break
+
+	# check lower
+	if (verbose):
+		print("...is", str(upper), "Lower...")
+	check = False
+	for curY in range(0, height):
+		lower = height - curY - 1
+		for curX in range(0, width, 2):
+			if check_pixel(curX, lower):
+				check = True
+				break
+		if check:
+			break
+
+	if (verbose):
+		print("...is", str(lower))
+
+	tmp_img = tmp_img.crop((left, upper, right, lower))
+	# TODO: add resize to newHeight/newWidth if smaller; if one is smaller, scale
+
+	tmp_img.save(output_location)
+
+	# TODO: remove temp PDF and JPGs
 
 	return 0
