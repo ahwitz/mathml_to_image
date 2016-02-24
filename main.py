@@ -3,6 +3,6 @@
 
 from mathml2jpg import mathml_to_jpg
 
-res = mathml_to_jpg("examples/Orgel 484_945.mml", "testout.jpg", overwrite=True, verbose=True)
+res = mathml_to_jpg("examples/Orgel 484_945.mml", "testout.jpg", overwrite=True, verbose=True, new_size="50x50^")
 if res != 0:
 	print(res)
