@@ -8,11 +8,11 @@ Requirements:
 
 TODO after requirement installation:
 - Set SETUPTEX_LOCATION in mathml2jpg.py to installation location of context/bin/setuptex from conTeXt installation
-- Change TMPFILE_ROOT location as needed
+- Change TEMPDIR_LOCATION location as needed
 
 Parameters:
-- source_location: location of source .mml file
-- output_location: location of output image file
+- source_location: location of source .mml file. Should be absolute.
+- output_location: location of output image file. Should be absolute.
 - verbose=False (optional): print debug/progress statements
 - overwrite=False (optional): overwrite output_location if it exists already
 - new_size=None (optional): new size, as parameter to convert -resize
